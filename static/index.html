@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive field note on crop and weed vision under occlusion, with a trained model and held-out evaluation.">
+  <title>When a weed hides behind a crop — FieldLens</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="#top"><span class="logo-mark">✳</span> FIELD<span>LENS</span></a>
+    <div class="header-links"><span>INDEPENDENT FIELD NOTE</span><a href="https://github.com/AndrewGordienko/fieldlens-carbon-robotics" target="_blank" rel="noreferrer">Code ↗</a></div>
+  </header>
+  <main id="top">
+    <article>
+      <header class="article-hero">
+        <div class="hero-copy">
+          <div class="eyebrow">COMPUTER VISION / AGRICULTURAL ROBOTICS</div>
+          <h1>When a weed hides<br><em>behind a crop.</em></h1>
+          <p class="dek">A field-image experiment on what a model sees, what it misses, and when it mistakes crop for weed.</p>
+          <div class="byline"><span class="author-dot">AG</span><span>Andrew Gordienko<br><small>Independent work sample for Carbon Robotics · September 2026</small></span></div>
+          <a class="read-link" href="#cases">Explore the evidence <span>↓</span></a>
+        </div>
+        <figure class="hero-figure"><img id="hero-image" alt="Close-up from a held-out rice-field image with a selected weed boxed"><figcaption>HELD-OUT FIELD IMAGE · BOX = WEED COMPONENT</figcaption></figure>
+      </header>
+      <div id="loading" class="loading">Loading the evaluated run…</div>
+      <div id="content" hidden>
+        <div class="article-body">
+          <p class="standfirst">Carbon’s <a href="https://carbonrobotics.com/laserweeding-technology" target="_blank" rel="noreferrer">LaserWeeder</a> uses vision to identify crops and weeds before laser targeting. I tested one perception question: <strong>what happens when crop foliage covers a weed?</strong> The test is whether a crop-risk limit chosen on validation images survives unseen images and added overlap. The images and model below are independent of Carbon.</p>
+          <section class="story-section" id="cases">
+            <div class="section-kicker">01 / LOOK AT THE EVIDENCE</div>
+            <h2>Start with a field image.</h2>
+            <p class="section-intro">The box marks one weed component. Change the cover level or flip between prediction, label, and probability.</p>
+            <div class="interactive-card explorer">
+              <div class="explorer-controls"><label>CROP OVERLAP<select id="case-overlap"><option value="all">All levels</option><option value="0">Clean</option><option value="0.4" selected>40% requested</option><option value="0.8">80% requested</option></select></label><label>FIND CASES BY<select id="case-sort"><option value="miss" selected>Visible weed misses</option><option value="risk">Crop false activation</option><option value="source">Image ID</option></select></label><button id="clear-field" hidden>All images ×</button><div class="case-selector"><button id="prev" aria-label="Previous case">←</button><span id="case-counter">—</span><button id="next" aria-label="Next case">→</button></div></div>
+              <div class="comparison"><figure><img id="source-image" alt="Field image close-up with selected weed boxed"><figcaption>FIELD IMAGE</figcaption></figure><figure><img id="analysis-image" alt="Model output on the same field image close-up"><figcaption id="analysis-caption">MODEL PREDICTION</figcaption></figure></div>
+              <div class="view-tabs"><button data-view="pred" class="selected">Prediction</button><button data-view="gt">Ground truth</button><button data-view="heat">Weed probability</button></div>
+              <div class="case-header"><div><span>IMAGE / COMPONENT</span><strong id="case-id">—</strong></div><div><span>MEASURED COVER</span><strong id="case-coverage">—</strong></div><div><span>VISIBLE WEED FOUND</span><strong id="case-recall">—</strong></div><div><span>INSERTED CROP CALLED WEED</span><strong id="case-risk">—</strong></div></div>
+              <p class="case-disclaimer">Blue overlay = crop; coral = weed. The box follows the original weed outline even where the crop covers it. These are pixel predictions, not laser targets.</p>
+            </div>
+          </section>
+          <section class="story-section" id="operating">
+            <div class="section-kicker">02 / THE CLEAN-IMAGE BASELINE</div>
+            <h2>A threshold can look safe on validation.</h2>
+            <p class="section-intro">I chose the weed threshold on validation images, then froze it before checking the held-out test images. Drag the slider to inspect the tradeoff; the reported result stays fixed.</p>
+            <div class="metric-row"><div class="metric"><span>WEED IoU</span><strong id="weed-iou">—</strong><small>test images</small></div><div class="metric emphasis"><span>CROP → WEED</span><strong id="crop-risk">—</strong><small id="crop-risk-ci">test crop pixels</small></div><div class="metric"><span>WEED RECALL</span><strong id="weed-recall">—</strong><small>test pixels</small></div><div class="metric"><span>INFERENCE</span><strong id="latency">—</strong><small>local device / image</small></div></div>
+            <div class="interactive-card"><div class="chart-wrap"><svg id="operating-chart" viewBox="0 0 760 320" role="img" aria-label="Crop false weed rate and weed recall across thresholds"></svg></div><div class="chart-legend"><span><i class="line-key val"></i> Validation crop error</span><span><i class="line-key test"></i> Test crop error</span><span><i class="line-key recall"></i> Test weed recall</span></div><div class="threshold-controls"><label for="threshold">Inspect threshold <strong id="inspect-threshold">—</strong></label><input id="threshold" type="range" min="0" max="26" step="1"><div class="threshold-values"><div><span>VALIDATION CROP ERROR</span><strong id="val-crop-error">—</strong></div><div><span>TEST CROP ERROR</span><strong id="test-crop-error">—</strong></div><div><span>TEST WEED RECALL</span><strong id="inspect-weed-recall">—</strong></div></div><p id="threshold-note"></p></div></div>
+            <div class="verdict" id="verdict"><div><span class="section-kicker">THE RELEASE CHECK</span><h3 id="verdict-title">—</h3><p id="verdict-text"></p></div><div class="gate-rule"><strong>≤1% crop → weed<br>≥70% weed recall</strong><small>Illustrative research gate, not a Carbon Robotics specification.</small></div></div>
+          </section>
+          <section class="story-section" id="overlap"><div class="section-kicker">03 / STRESS THE MODEL</div><h2>Cover the weed. Watch recall fall.</h2><p class="section-intro">I pasted crop cutouts from training images over 60 weeds in the test set. The blue line measures recall on visible weed pixels; coral bars show activation on the pasted crop.</p><div class="interactive-card"><div class="chart-head"><strong id="stress-count">WEED COMPONENTS</strong><span>REQUESTED COVER / MEASURED COVER</span></div><div class="chart-wrap"><svg id="overlap-chart" viewBox="0 0 900 320" role="img" aria-label="Visible weed recall and crop false activations by crop overlap"></svg></div><div class="chart-legend"><span><i class="line-key recall"></i> Visible weed recall</span><span><i class="box-key"></i> Inserted crop called weed</span></div><div class="finding"><strong id="overlap-finding">—</strong><span id="overlap-detail"></span></div></div><p class="fineprint">Measured cover falls short of some requests because thin rice cutouts cannot fully hide a broad weed. Both values are shown. These composites expose behavior; they do not estimate field failure rates.</p></section>
+          <section class="story-section" id="field-audit"><div class="section-kicker">04 / INSPECT THE RUN</div><h2>Which images drove the result?</h2><p class="section-intro">Each row is one held-out tile. Select a row to inspect its sampled cases above.</p><div class="interactive-card audit-grid"><div class="table-wrap"><table><thead><tr><th>IMAGE</th><th>WEED IoU</th><th>CROP IoU</th><th>CROP → WEED</th><th>WEED RECALL</th></tr></thead><tbody id="field-rows"></tbody></table></div><div class="audit-note"><span>CALIBRATION / PLANT PIXELS</span><strong id="brier">—</strong><small>Brier score</small><div id="calibration-bars"></div><p>Blue bars = observed weed frequency. Coral ticks = predicted weed confidence.</p></div></div></section>
+          <section class="story-section method" id="method"><div class="section-kicker">05 / WHAT I WOULD DO NEXT</div><h2>A useful failure, with clear limits.</h2><p class="section-intro">The demo catches a real evaluation issue: the validation threshold did not hold the crop-risk line on test images. A production decision would need representative Carbon field video and the actual target-selection pipeline.</p><div class="method-grid"><div><strong>Built</strong><p>Grouped image split, trained segmenter, validation threshold, test audit, overlap stress test, TorchScript export, and this reproducible report.</p></div><div><strong>Still needed</strong><p>Field-specific images, natural overlap labels, lighting and crop slices, meristem targets, and measured actuation outcomes.</p></div></div><details><summary>Method and provenance <span>+</span></summary><div class="details-body"><p>224 annotated tiles from 28 original photos. All eight adjacent tiles from each original stay in one split: 18 train, five validation, five test. ResNet-18 encoder with U-Net-style decoder, weighted cross entropy and Dice loss. Best epoch selected on validation mean plant IoU; threshold selected on validation crop risk. Test bootstrap resamples images.</p><p id="provenance">—</p><p>Rice paddies differ from Carbon’s production fields. Crop overlays are synthetic. Crop pixels called weed are a vision-risk proxy, not crop damage.</p></div></details><div class="source-links"><a href="https://carbonrobotics.com/laserweeding-technology" target="_blank" rel="noreferrer">Carbon technology ↗</a><a href="https://carbonrobotics.com/job-openings?gh_jid=4673637006" target="_blank" rel="noreferrer">Role ↗</a><a href="https://figshare.com/articles/dataset/rice_seedlings_and_weeds/7488830" target="_blank" rel="noreferrer">Dataset / CC BY 4.0 ↗</a><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0215676" target="_blank" rel="noreferrer">Paper ↗</a><a href="https://github.com/AndrewGordienko/fieldlens-carbon-robotics" target="_blank" rel="noreferrer">Code ↗</a></div></section>
+        </div>
+      </div>
+    </article>
+  </main>
+  <footer class="site-footer"><span>FIELDLENS · ANDREW GORDIENKO</span><span>IMAGES: MA ET AL. 2019, CC BY 4.0 · INDEPENDENT WORK SAMPLE · NOT AFFILIATED WITH CARBON ROBOTICS</span></footer>
+  <script src="static/app.js"></script>
+</body>
+</html>
