@@ -1,4 +1,4 @@
-let data, thresholdIndex = 0, caseIndex = 0, imageView = 'pred', selectedField = null;
+let data, thresholdIndex = 0, caseIndex = 0, imageView = 'pred', selectedField = null, currentCaseId = null, currentCaseTarget = null;
 const $ = (id) => document.getElementById(id);
 const pct = (n, places = 1) => n == null ? '—' : `${(100 * n).toFixed(places)}%`;
 const esc = (text) => String(text).replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -61,16 +61,23 @@ function cases() {
   return rows;
 }
 
-function showCase() {
+function showCase(preferredId = null, preferredTarget = null) {
   const list = cases();
   if (!list.length) return;
+  if (preferredId) {
+    const match = list.findIndex((item) => item.id === preferredId && (preferredTarget === null || item.target === preferredTarget));
+    if (match >= 0) caseIndex = match;
+  }
   caseIndex = ((caseIndex % list.length) + list.length) % list.length;
   const row = list[caseIndex];
+  currentCaseId = row.id; currentCaseTarget = row.target;
   $('case-counter').textContent = `${String(caseIndex+1).padStart(2,'0')} / ${String(list.length).padStart(2,'0')}${selectedField ? ` · IMAGE ${selectedField}` : ''}`;
   $('case-id').textContent = row.id;
   $('case-coverage').textContent = pct(row.actual);
   $('case-recall').textContent = row.visible_pixels < 10 ? 'N/A' : pct(row.visible_weed_recall);
   $('case-risk').textContent = row.occluder_crop_pixels ? pct(row.occluder_false_weed_pixels / row.occluder_crop_pixels) : '—';
+  const clean = data.cases.find((item) => item.id === row.id && item.target === 0);
+  $('case-change').innerHTML = `<span>SAME WEED · CLEAN <strong>${pct(clean?.visible_weed_recall)}</strong></span><b>→</b><span>${row.target ? 'WITH CROP OVERLAP' : 'CLEAN VIEW'} <strong>${pct(row.visible_weed_recall)}</strong></span>`;
   $('source-image').src = row.images.rgb;
   $('analysis-image').src = row.images[imageView];
   $('analysis-caption').textContent = ({pred:'MODEL PREDICTION',gt:'GROUND TRUTH',heat:'WEED PROBABILITY'})[imageView];
@@ -110,8 +117,8 @@ async function start() {
     operatingChart(); overlapChart(); fieldAudit(); showCase();
     $('hero-image').src = data.gallery.find((item) => item.target === .4)?.images.rgb || data.gallery[0].images.rgb;
     $('threshold').addEventListener('input', (event) => { thresholdIndex = Number(event.target.value); operatingChart(); });
-    $('case-overlap').addEventListener('change', () => { caseIndex = 0; showCase(); });
-    $('case-sort').addEventListener('change', () => { caseIndex = 0; showCase(); });
+    $('case-overlap').addEventListener('change', () => { caseIndex = 0; showCase(currentCaseId); });
+    $('case-sort').addEventListener('change', () => { caseIndex = 0; showCase(currentCaseId, currentCaseTarget); });
     $('prev').addEventListener('click', () => { caseIndex--; showCase(); });
     $('next').addEventListener('click', () => { caseIndex++; showCase(); });
     $('clear-field').addEventListener('click', () => { selectedField = null; caseIndex = 0; $('clear-field').hidden = true; showCase(); });

@@ -38,12 +38,13 @@
           <section class="story-section" id="cases">
             <div class="section-kicker">01 / LOOK AT THE EVIDENCE</div>
             <h2>Start with a field image.</h2>
-            <p class="section-intro">The box marks one weed component. Change the cover level or flip between prediction, label, and probability.</p>
+            <p class="section-intro">The box marks one weed component. Change the cover level to compare the same weed, or flip between prediction, label, and probability.</p>
             <div class="interactive-card explorer">
               <div class="explorer-controls"><label>CROP OVERLAP<select id="case-overlap"><option value="all">All levels</option><option value="0">Clean</option><option value="0.4" selected>40% requested</option><option value="0.8">80% requested</option></select></label><label>FIND CASES BY<select id="case-sort"><option value="miss" selected>Visible weed misses</option><option value="risk">Crop false activation</option><option value="source">Image ID</option></select></label><button id="clear-field" hidden>All images ×</button><div class="case-selector"><button id="prev" aria-label="Previous case">←</button><span id="case-counter">—</span><button id="next" aria-label="Next case">→</button></div></div>
               <div class="comparison"><figure><img id="source-image" alt="Field image close-up with selected weed boxed"><figcaption>FIELD IMAGE</figcaption></figure><figure><img id="analysis-image" alt="Model output on the same field image close-up"><figcaption id="analysis-caption">MODEL PREDICTION</figcaption></figure></div>
               <div class="view-tabs"><button data-view="pred" class="selected">Prediction</button><button data-view="gt">Ground truth</button><button data-view="heat">Weed probability</button></div>
               <div class="case-header"><div><span>IMAGE / COMPONENT</span><strong id="case-id">—</strong></div><div><span>MEASURED COVER</span><strong id="case-coverage">—</strong></div><div><span>VISIBLE WEED FOUND</span><strong id="case-recall">—</strong></div><div><span>INSERTED CROP CALLED WEED</span><strong id="case-risk">—</strong></div></div>
+              <div class="before-after" id="case-change">—</div>
               <p class="case-disclaimer">Blue overlay = crop; coral = weed. The box follows the original weed outline even where the crop covers it. These are pixel predictions, not laser targets.</p>
             </div>
           </section>
